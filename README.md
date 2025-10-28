@@ -7,6 +7,138 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+# Mental Prompt - Laravel Application
+
+Aplikasi Laravel untuk manajemen prompt kualitas dengan **Laravel Octane + RoadRunner** untuk performa maksimal.
+
+## 🚀 Quick Start dengan Docker
+
+### Prerequisites
+- Docker & Docker Compose terinstall
+- Git
+
+### Setup & Jalankan Aplikasi
+
+1. **Clone repository**
+   ```bash
+   git clone <repository-url>
+   cd mental-prompt
+   ```
+
+2. **Setup environment**
+   ```bash
+   cp env.example .env
+   ```
+
+3. **Build dan jalankan containers**
+   ```bash
+   docker-compose up --build
+   ```
+
+4. **Akses aplikasi**
+   - Frontend: http://localhost
+   - Database: localhost:3306
+
+### Docker Services
+
+- **App (Laravel Octane)**: PHP 8.2 CLI + RoadRunner server
+- **MySQL 8.0**: Database dengan persistent storage
+- **Nginx**: Reverse proxy dengan konfigurasi optimized untuk Octane
+
+### ⚡ Laravel Octane
+
+Aplikasi ini menggunakan Laravel Octane dengan RoadRunner untuk:
+- **10-100x lebih cepat** dari traditional PHP-FPM
+- **In-memory application bootstrap** - aplikasi di-load sekali di memory
+- **Concurrent request handling** dengan 4 workers (configurable)
+- **Automatic worker recycling** setiap 500 requests untuk memory management
+
+### Useful Commands
+
+```bash
+# Jalankan di background
+docker-compose up -d
+
+# Stop containers
+docker-compose down
+
+# Rebuild containers (clean build)
+docker-compose down && docker-compose up --build --force-recreate
+
+# Lihat logs
+docker-compose logs -f app
+
+# Lihat logs real-time dari Octane
+docker-compose logs -f app | grep -i octane
+
+# Masuk ke container app
+docker-compose exec app bash
+
+# Restart Octane (reload code changes)
+docker-compose restart app
+
+# Jalankan artisan commands
+docker-compose exec app php artisan migrate
+docker-compose exec app php artisan queue:work
+
+# Monitor Octane stats
+docker-compose exec app php artisan octane:status
+```
+
+### Environment Variables
+
+File `.env` sudah dikonfigurasi untuk Docker:
+- **Server**: Laravel Octane dengan RoadRunner
+- **Database**: MySQL container
+- **Cache/Queue/Session**: File-based (simple & reliable)
+- **App URL**: http://localhost
+
+### Database
+
+- **Host**: mysql
+- **Database**: mental_prompt
+- **Username**: root
+- **Password**: rootpassword
+
+Migrations akan otomatis dijalankan saat container pertama kali start.
+
+## 📋 Development tanpa Docker
+
+Jika ingin development tanpa Docker:
+
+```bash
+composer install
+npm install
+npm run build
+php artisan key:generate
+php artisan migrate
+
+# Install Octane
+php artisan octane:install
+
+# Start Octane server
+php artisan octane:start --server=roadrunner --host=0.0.0.0 --port=8000
+```
+
+## 🔥 Performance Tips
+
+1. **Octane Worker Tuning**: Adjust workers based on CPU cores
+   ```bash
+   php artisan octane:start --workers=8 --max-requests=1000
+   ```
+
+2. **Cache untuk Production**:
+   ```bash
+   docker-compose exec app php artisan config:cache
+   docker-compose exec app php artisan route:cache
+   docker-compose exec app php artisan view:cache
+   ```
+
+3. **Monitor Performance**:
+   ```bash
+   docker-compose exec app php artisan octane:status
+   ```
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:

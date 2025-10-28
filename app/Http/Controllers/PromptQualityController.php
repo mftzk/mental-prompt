@@ -99,10 +99,21 @@ class PromptQualityController extends Controller
             )
             ->first();
 
+        // ===== GRANULAR TIME-SERIES DATA (For detailed charts) =====
+        $granularStats = collect([]);
+        $showGranularChart = false;
+        
+        if ($range !== 'all') {
+            $granularStats = $this->getGranularTimeSeriesData($range, $selectedProject);
+            $showGranularChart = true;
+        }
+
         return view('dashboard', [
-            'overallStats'     => $overallStats,      // 👈 All-time stats
-            'timeSeriesStats'  => $timeSeriesStats,   // 👈 Time-filtered stats
-            'range'            => $range,
+            'overallStats'      => $overallStats,      // 👈 All-time stats
+            'timeSeriesStats'   => $timeSeriesStats,   // 👈 Time-filtered stats
+            'granularStats'     => $granularStats,     // 👈 Granular time-series data
+            'showGranularChart' => $showGranularChart, // 👈 Flag to show/hide granular chart
+            'range'             => $range,
             'availableProjects' => $availableProjects,
             'selectedProject'   => $selectedProject,
         ]);
@@ -110,14 +121,66 @@ class PromptQualityController extends Controller
 
     /**
      * Generate platform-specific SQL expression for timestamp bucketing.
+     * @param string $column The column name to bucket
+     * @param int $seconds The interval in seconds
+     * @param string $driver The database driver
+     * @return string SQL expression for time bucketing
      */
-    private function getTimestampIntervalExpression(string $column, int $minutes, string $driver): string
+    private function getTimestampIntervalExpression(string $column, int $seconds, string $driver): string
     {
         return match ($driver) {
-            'mysql' => "FROM_UNIXTIME(FLOOR(UNIX_TIMESTAMP($column) / ($minutes * 60)) * ($minutes * 60))",
-            'pgsql' => "to_timestamp(floor(extract(epoch from $column) / ($minutes * 60)) * ($minutes * 60))",
-            'sqlite' => "datetime(floor(strftime('%s', $column) / ($minutes * 60)) * ($minutes * 60), 'unixepoch')",
-            default => "strftime('%Y-%m-%d %H:%M:00', $column)", // Fallback, may not be precise
+            'mysql' => "FROM_UNIXTIME(FLOOR(UNIX_TIMESTAMP($column) / $seconds) * $seconds)",
+            'pgsql' => "to_timestamp(floor(extract(epoch from $column) / $seconds) * $seconds)",
+            'sqlite' => "datetime(floor(strftime('%s', $column) / $seconds) * $seconds, 'unixepoch')",
+            default => "strftime('%Y-%m-%d %H:%M:00', $column)", // Fallback
         };
+    }
+
+    /**
+     * Get granular time-series data with adaptive intervals based on range.
+     * @param string $range Time range filter (30m, 1h, 1d, 1w, 1m)
+     * @param string|null $project Project filter
+     * @return \Illuminate\Support\Collection
+     */
+    private function getGranularTimeSeriesData(string $range, ?string $project): \Illuminate\Support\Collection
+    {
+        // Define interval in seconds and time range for each option
+        [$intervalSeconds, $from] = match ($range) {
+            '30m' => [10, now()->subMinutes(30)],      // 10-second intervals
+            '1h'  => [30, now()->subHour()],           // 30-second intervals
+            '1d'  => [30, now()->subDay()],            // 30-second intervals
+            '1w'  => [3600, now()->subWeek()],         // 1-hour intervals
+            '1m'  => [86400, now()->subMonth()],       // 1-day intervals
+            default => [30, now()->subDay()],
+        };
+
+        $driver = DB::connection()->getDriverName();
+        $timestampExpr = $this->getTimestampIntervalExpression('pq.created_at', $intervalSeconds, $driver);
+
+        $query = DB::table('prompt_qualities as pq')
+            ->where('pq.created_at', '>=', $from);
+
+        if ($project) {
+            $query->where('pq.project', $project);
+        }
+
+        return $query
+            ->select(
+                DB::raw("$timestampExpr as timestamp"),
+                DB::raw('AVG(pq.efektivitas) as avg_quality'),
+                DB::raw('AVG(pq.membingungkan) as avg_confusion'),
+                DB::raw('COUNT(*) as total_records')
+            )
+            ->groupBy('timestamp')
+            ->orderBy('timestamp')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'timestamp' => $item->timestamp,
+                    'avg_quality' => round((float)$item->avg_quality, 2),
+                    'avg_confusion' => round((float)$item->avg_confusion, 2),
+                    'total_records' => $item->total_records
+                ];
+            });
     }
 } 
