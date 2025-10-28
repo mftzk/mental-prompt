@@ -53,8 +53,9 @@ RUN echo '#!/bin/bash\n\
 set -e\n\
 \n\
 echo "Waiting for MySQL..."\n\
-while ! mysqladmin ping -h mysql -P 3306 --silent; do\n\
-    sleep 1\n\
+while ! mysqladmin ping -h ${DB_HOST:-mysql} -P ${DB_PORT:-3306} -u ${DB_USERNAME:-root} -p${DB_PASSWORD} --silent 2>/dev/null; do\n\
+    echo "Database not ready, waiting..."\n\
+    sleep 2\n\
 done\n\
 echo "MySQL is ready!"\n\
 \n\
