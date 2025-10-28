@@ -40,8 +40,20 @@ COPY . .
 # Build frontend assets (non-blocking)
 RUN npm run build || echo "Build failed, skipping asset compilation"
 
-# Install RoadRunner binary using Octane's built-in installer (will be done on first run)
-# This approach is more reliable as Octane manages the correct version
+# Install RoadRunner during build time
+RUN php artisan octane:install --server=roadrunner --force && \
+    mv rr /usr/local/bin/rr || \
+    (test -f vendor/bin/rr && mv vendor/bin/rr /usr/local/bin/rr) || \
+    echo "RoadRunner installation will be handled at runtime"
+
+# Publish Octane config during build time
+RUN php artisan vendor:publish --provider="Laravel\\Octane\\OctaneServiceProvider" --force || \
+    echo "Octane config will be published at runtime"
+
+# Create necessary directories
+RUN mkdir -p storage/framework/{sessions,views,cache} \
+    && mkdir -p storage/logs \
+    && mkdir -p bootstrap/cache
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html \
@@ -52,12 +64,25 @@ RUN chown -R www-data:www-data /var/www/html \
 RUN echo '#!/bin/bash\n\
 set -e\n\
 \n\
-echo "Waiting for MySQL..."\n\
-while ! mysqladmin ping -h ${DB_HOST:-mysql} -P ${DB_PORT:-3306} -u ${DB_USERNAME:-root} -p${DB_PASSWORD} --silent 2>/dev/null; do\n\
-    echo "Database not ready, waiting..."\n\
-    sleep 2\n\
-done\n\
-echo "MySQL is ready!"\n\
+if [ "${SKIP_DB_CHECK:-false}" = "true" ]; then\n\
+    echo "Skipping database health check..."\n\
+else\n\
+    echo "Waiting for MySQL..."\n\
+    echo "DB_HOST: ${DB_HOST:-mysql}"\n\
+    echo "DB_PORT: ${DB_PORT:-3306}"\n\
+    echo "DB_USERNAME: ${DB_USERNAME:-root}"\n\
+    echo "DB_PASSWORD: ***SET***"\n\
+    \n\
+    while ! mysqladmin ping -h ${DB_HOST:-mysql} -P ${DB_PORT:-3306} -u ${DB_USERNAME:-root} -p${DB_PASSWORD} --silent 2>/dev/null; do\n\
+        echo "Database not ready, waiting..."\n\
+        sleep 2\n\
+    done\n\
+    echo "MySQL is ready!"\n\
+fi\n\
+\n\
+# Ensure storage directories exist\n\
+mkdir -p storage/framework/{sessions,views,cache} storage/logs bootstrap/cache\n\
+chown -R www-data:www-data storage bootstrap/cache\n\
 \n\
 # Copy .env if not exists\n\
 if [ ! -f .env ]; then\n\
@@ -70,29 +95,13 @@ if [ -z "$APP_KEY" ] || [ "$APP_KEY" = "null" ]; then\n\
     php artisan key:generate --force 2>/dev/null || echo "Failed to generate key"\n\
 fi\n\
 \n\
-# Run migrations\n\
-echo "Running migrations..."\n\
-php artisan migrate --force 2>/dev/null || echo "Migration failed"\n\
-\n\
-# Install RoadRunner if not exists\n\
-if [ ! -f /usr/local/bin/rr ]; then\n\
-    echo "Installing RoadRunner..."\n\
-    php artisan octane:install --server=roadrunner --force 2>/dev/null || echo "RoadRunner install failed"\n\
-    mv vendor/bin/rr /usr/local/bin/rr 2>/dev/null || echo "RoadRunner already in /usr/local/bin"\n\
+# Run migrations only if AUTO_MIGRATE is enabled\n\
+if [ "${AUTO_MIGRATE:-false}" = "true" ]; then\n\
+    echo "Running migrations..."\n\
+    php artisan migrate --force 2>/dev/null || echo "Migration failed"\n\
+else\n\
+    echo "Skipping migrations (set AUTO_MIGRATE=true to enable)"\n\
 fi\n\
-\n\
-# Publish Octane config if not exists\n\
-if [ ! -f config/octane.php ]; then\n\
-    echo "Publishing Octane configuration..."\n\
-    php artisan vendor:publish --provider="Laravel\\\\Octane\\\\OctaneServiceProvider" --force 2>/dev/null || echo "Octane publish failed"\n\
-fi\n\
-\n\
-# Clear and cache configurations\n\
-echo "Optimizing application..."\n\
-php artisan config:clear 2>/dev/null || echo "Config clear failed"\n\
-php artisan config:cache 2>/dev/null || echo "Config cache failed"\n\
-php artisan route:cache 2>/dev/null || echo "Route cache failed"\n\
-php artisan view:cache 2>/dev/null || echo "View cache failed"\n\
 \n\
 # Start Octane with RoadRunner\n\
 echo "Starting Laravel Octane with RoadRunner..."\n\
