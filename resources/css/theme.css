@@ -1,0 +1,228 @@
+/* ========================================
+   Shared Theme System for Auth & Dashboard
+   ======================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* --------------------------------------------------
+   Global Font Family
+-------------------------------------------------- */
+* {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* --------------------------------------------------
+   Global Color Variables – refined, elegant palette
+-------------------------------------------------- */
+:root {
+    --clr-primary:      #3F7D58; /* primary-green */
+    --clr-accent:       #EF9651; /* primary-orange */
+    --clr-danger:       #EC5228; /* primary-red-orange */
+    --clr-bg:           #ffffff; /* primary-white */
+    --clr-card-bg:      #ffffff;
+    --clr-border:       #d1d5db;  /* gray-300 */
+    --clr-text-main:    #1f2937;  /* gray-800 */
+    --clr-text-sub:     #4b5563;  /* gray-600 */
+    --clr-text-on-primary: #ffffff;
+    --clr-shadow:       rgba(0, 0, 0, 0.08);
+    --clr-shadow-lg:    rgba(0, 0, 0, 0.12);
+}
+
+/* --------------------------------------------------
+   Dark Mode Color Variables
+-------------------------------------------------- */
+:root[data-theme="dark"] {
+    --clr-primary:      #3F7D58; /* keep green for charts */
+    --clr-accent:       #FF6B35; /* bright orange accent */
+    --clr-danger:       #EC5228; /* primary-red-orange */
+    --clr-bg:           #1a1f2e; /* dark navy background */
+    --clr-card-bg:      #242b3d; /* elevated card surface */
+    --clr-border:       #2d3748;  /* subtle borders */
+    --clr-text-main:    #e5e7eb;  /* light gray text */
+    --clr-text-sub:     #9ca3af;  /* muted gray text */
+    --clr-text-on-primary: #ffffff;
+    --clr-shadow:       rgba(0, 0, 0, 0.3);
+    --clr-shadow-lg:    rgba(0, 0, 0, 0.5);
+}
+
+/* --------------------------------------------------
+   Base Background Classes
+-------------------------------------------------- */
+.gradient-bg {
+    background-color: var(--clr-bg);
+    min-height: 100vh;
+}
+
+/* --------------------------------------------------
+   Component Styles
+-------------------------------------------------- */
+.glass-card {
+    background: var(--clr-card-bg);
+    backdrop-filter: none;
+    border: 1px solid var(--clr-border);
+    border-radius: 12px;
+    box-shadow: none;
+    transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+    box-shadow: none;
+    transform: none;
+}
+
+/* --------------------------------------------------
+   Button Styles
+-------------------------------------------------- */
+button:not(.range-btn):not(.copy-button) {
+    background: var(--clr-primary);
+    color: var(--clr-text-on-primary);
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+button:not(.range-btn):not(.copy-button):hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+button:not(.range-btn):not(.copy-button):active {
+    transform: translateY(0);
+}
+
+/* --------------------------------------------------
+   Input Styles
+-------------------------------------------------- */
+.input-styled {
+    border: 1px solid var(--clr-border);
+    background-color: var(--clr-card-bg);
+    color: var(--clr-text-main);
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-weight: 500;
+    min-width: 240px;
+}
+
+.input-styled:focus {
+    outline: none;
+    border-color: var(--clr-primary);
+    box-shadow: 0 0 0 3px rgba(63, 125, 88, 0.1);
+}
+
+/* --------------------------------------------------
+   Range Button Styles (for consistency)
+-------------------------------------------------- */
+.range-btn {
+    border: 1px solid var(--clr-border);
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    padding: 12px 20px;
+    font-weight: 500;
+    background-color: var(--clr-card-bg);
+    color: var(--clr-text-main);
+}
+
+.range-btn:hover {
+    background-color: rgba(63, 125, 88, 0.1);
+    border-color: var(--clr-primary);
+}
+
+.range-btn.active {
+    background: var(--clr-primary);
+    border: 1px solid var(--clr-primary);
+    color: var(--clr-text-on-primary) !important;
+    box-shadow: 0 4px 15px rgba(63, 125, 88, 0.35);
+}
+
+/* --------------------------------------------------
+   Select Styles
+-------------------------------------------------- */
+select {
+    border: 1px solid var(--clr-border);
+    background-color: var(--clr-card-bg);
+    color: var(--clr-text-main);
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 200px;
+}
+
+select:focus {
+    outline: none;
+    border-color: var(--clr-primary);
+    box-shadow: 0 0 0 3px rgba(63, 125, 88, 0.1);
+}
+
+/* --------------------------------------------------
+   Global Text Colors
+-------------------------------------------------- */
+body {
+    color: var(--clr-text-main);
+}
+
+/* --------------------------------------------------
+   Utility Classes
+-------------------------------------------------- */
+.text-sub {
+    color: var(--clr-text-sub);
+}
+
+.text-danger {
+    color: var(--clr-danger);
+}
+
+.text-primary {
+    color: var(--clr-primary);
+}
+
+.border-radius-lg {
+    border-radius: 12px;
+}
+
+/* --------------------------------------------------
+   Animation Utilities
+-------------------------------------------------- */
+.transition-all {
+    transition: all 0.3s ease;
+}
+
+/* --------------------------------------------------
+   Layout Utilities
+-------------------------------------------------- */
+.flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.flex-col-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* --------------------------------------------------
+   Responsive Design
+-------------------------------------------------- */
+@media (max-width: 768px) {
+    .glass-card {
+        margin: 20px;
+        padding: 20px;
+    }
+
+    button:not(.range-btn):not(.copy-button) {
+        width: 100%;
+        padding: 14px;
+    }
+
+    .input-styled {
+        width: 100%;
+        min-width: auto;
+    }
+}

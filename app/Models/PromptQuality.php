@@ -14,6 +14,8 @@ class PromptQuality extends Model
         'project',
         'efektivitas',
         'membingungkan',
+        'ambiguous',
+        'comments',
     ];
 
     // Intentionally no relation to users anymore (metrics tracked anonymously)

@@ -8,6 +8,16 @@ services:
     container_name: mental-prompt-app
     restart: unless-stopped
     working_dir: /var/www/html
+    volumes:
+      # Mount untuk development - file changes langsung keliatan
+      - ./resources:/var/www/html/resources
+      - ./routes:/var/www/html/routes
+      - ./app:/var/www/html/app
+      - ./config:/var/www/html/config
+      - ./public:/var/www/html/public
+      # Keep container's vendor & node_modules (jangan di-override host)
+      - /var/www/html/vendor
+      - /var/www/html/node_modules
     environment:
       - APP_NAME=MentalPrompt
       - APP_ENV=local
@@ -29,6 +39,31 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+    networks:
+      - app-network
+
+  vite:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mental-prompt-vite
+    restart: unless-stopped
+    working_dir: /var/www/html
+    command: npm run dev
+    volumes:
+      - ./resources:/var/www/html/resources
+      - ./routes:/var/www/html/routes
+      - ./app:/var/www/html/app
+      - ./config:/var/www/html/config
+      - ./public:/var/www/html/public
+      - ./package.json:/var/www/html/package.json
+      - ./package-lock.json:/var/www/html/package-lock.json
+      - ./vite.config.js:/var/www/html/vite.config.js
+      - ./tailwind.config.js:/var/www/html/tailwind.config.js
+      - /var/www/html/vendor
+      - /var/www/html/node_modules
+    ports:
+      - "5173:5173"
     networks:
       - app-network
 

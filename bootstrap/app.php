@@ -14,6 +14,11 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // Register global middleware
         $middleware->append(\App\Http\Middleware\VerboseLogging::class);
+        
+        // Register route middleware aliases
+        $middleware->alias([
+            'client.auth' => \App\Http\Middleware\AuthenticateClient::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

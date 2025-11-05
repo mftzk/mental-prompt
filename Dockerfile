@@ -27,7 +27,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Copy composer files first for better layer caching
 COPY composer.json composer.lock ./
 
-# Install PHP dependencies (without running scripts)
+# Install PHP dependencies (without scripts first)
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
 # Copy package.json for Node dependencies
@@ -37,14 +37,14 @@ RUN npm install
 # Copy application files
 COPY . .
 
+# Run composer scripts now that application files are available
+RUN composer run-script post-autoload-dump
+
 # Build frontend assets (non-blocking)
 RUN npm run build || echo "Build failed, skipping asset compilation"
 
-# Install RoadRunner during build time
-RUN php artisan octane:install --server=roadrunner --force && \
-    mv rr /usr/local/bin/rr || \
-    (test -f vendor/bin/rr && mv vendor/bin/rr /usr/local/bin/rr) || \
-    echo "RoadRunner installation will be handled at runtime"
+# Install RoadRunner via Octane
+RUN php artisan octane:install --server=roadrunner --force
 
 # Publish Octane config during build time
 RUN php artisan vendor:publish --provider="Laravel\\Octane\\OctaneServiceProvider" --force || \
