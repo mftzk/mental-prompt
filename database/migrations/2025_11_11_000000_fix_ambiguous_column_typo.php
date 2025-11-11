@@ -11,12 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Check if the column exists before trying to rename it
-        if (Schema::hasColumn('prompt_qualities', 'ambigoues')) {
-            Schema::table('prompt_qualities', function (Blueprint $table) {
+        Schema::table('prompt_qualities', function (Blueprint $table) {
+            // Fix the typo by renaming the column, if it exists with the wrong name
+            if (Schema::hasColumn('prompt_qualities', 'ambigoues')) {
                 $table->renameColumn('ambigoues', 'ambiguous');
-            });
-        }
+            }
+
+            // Ensure the 'comments' column exists
+            if (!Schema::hasColumn('prompt_qualities', 'comments')) {
+                $table->text('comments')->nullable()->after('ambiguous');
+            }
+        });
     }
 
     /**
@@ -24,11 +29,16 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Check if the column exists before trying to rename it back
-        if (Schema::hasColumn('prompt_qualities', 'ambiguous')) {
-            Schema::table('prompt_qualities', function (Blueprint $table) {
+        Schema::table('prompt_qualities', function (Blueprint $table) {
+            // Revert the typo fix
+            if (Schema::hasColumn('prompt_qualities', 'ambiguous')) {
                 $table->renameColumn('ambiguous', 'ambigoues');
-            });
-        }
+            }
+
+            // Remove the 'comments' column if it exists
+            if (Schema::hasColumn('prompt_qualities', 'comments')) {
+                $table->dropColumn('comments');
+            }
+        });
     }
 };
