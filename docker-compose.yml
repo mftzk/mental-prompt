@@ -24,7 +24,6 @@ services:
       - CACHE_DRIVER=file
       - QUEUE_CONNECTION=database
       - SESSION_DRIVER=file
-      - OCTANE_SERVER=roadrunner
     depends_on:
       mysql:
         condition: service_healthy

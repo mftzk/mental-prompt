@@ -1,6 +1,6 @@
 # Stage 1: Builder
 # This stage builds all necessary assets and dependencies.
-FROM php:8.2-cli as builder
+FROM php:8.2-fpm as builder
 
 WORKDIR /var/www/html
 
@@ -47,7 +47,7 @@ RUN php artisan octane:install --server=roadrunner --force
 
 # Stage 2: Production Image
 # This stage creates the final, lean image with Nginx and Supervisor.
-FROM php:8.2-cli
+FROM php:8.2-fpm
 
 WORKDIR /var/www/html
 
