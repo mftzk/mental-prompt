@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import tailwindcss from '@tailwindcss/vite';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
     plugins: [
         laravel({
             input: [
@@ -21,4 +21,6 @@ export default defineConfig({
             host: 'localhost',
         },
     },
-});
+    // Force HTTPS assets in production
+    base: mode === 'production' ? 'https://mental-prompt-1761661964.nrapken.dev/' : '/',
+}));

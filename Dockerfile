@@ -64,6 +64,11 @@ RUN docker-php-ext-install pdo_mysql sockets
 # Copy application files from the builder stage
 COPY --from=builder /var/www/html .
 
+# Set production environment variables
+ENV APP_URL=https://mental-prompt-1761661964.nrapken.dev
+ENV APP_ENV=production
+ENV APP_DEBUG=false
+
 # Copy Nginx and Supervisor configurations
 # We will create these files in the next steps
 RUN rm -f /etc/nginx/sites-enabled/default
