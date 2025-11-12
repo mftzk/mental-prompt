@@ -632,7 +632,7 @@
                 </div>
 
                 <!-- Right-aligned controls -->
-                <div class="flex items-center gap-4" style="margin-left: auto;">
+                <div class="flex items-center gap-4">
                     <!-- Time Range Buttons -->
                     <div class="button-group">
                         <template x-for="opt in rangeOptions" :key="opt.value">

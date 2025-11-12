@@ -40,6 +40,10 @@ COPY . .
 # Build frontend assets
 RUN npm run build
 
+# Clear caches before finishing the build
+RUN php artisan config:clear
+RUN php artisan route:clear
+
 # Install RoadRunner via Octane
 RUN php artisan octane:install --server=roadrunner --force
 
@@ -76,11 +80,15 @@ COPY docker/nginx/prod.conf /etc/nginx/conf.d/default.conf
 COPY docker/supervisor/supervisord.conf /etc/supervisor/supervisord.conf
 COPY docker/supervisor/conf.d/app.conf /etc/supervisor/conf.d/app.conf
 
-# Set permissions
+# Set permissions and create required directories
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache \
     && mkdir -p /var/run/supervisor /var/log/supervisor \
-    && chown -R www-data:www-data /var/run/supervisor /var/log/supervisor
+    && mkdir -p /var/www/html/storage/framework/cache/data \
+    && mkdir -p /var/www/html/storage/framework/views \
+    && mkdir -p /var/www/html/storage/framework/sessions \
+    && mkdir -p /var/www/html/storage/logs \
+    && chown -R www-data:www-data /var/run/supervisor /var/log/supervisor /var/www/html/storage/framework /var/www/html/storage/logs
 
 # Expose port 80 for Nginx
 EXPOSE 80

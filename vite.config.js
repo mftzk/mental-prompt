@@ -13,6 +13,7 @@ export default defineConfig(({ mode }) => ({
             ],
             refresh: true,
         }),
+        tailwindcss(),
     ],
     server: {
         host: '0.0.0.0',
