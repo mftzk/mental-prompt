@@ -9,7 +9,7 @@
 
 # Mental Prompt - Laravel Application
 
-Aplikasi Laravel untuk manajemen prompt kualitas dengan **Laravel Octane + RoadRunner** untuk performa maksimal.
+Aplikasi Laravel untuk manajemen prompt kualitas dengan **Laravel Octane + RoadRunner** untuk performa maksimal, disajikan melalui Nginx dalam satu container Docker.
 
 ## 🚀 Quick Start dengan Docker
 
@@ -19,31 +19,35 @@ Aplikasi Laravel untuk manajemen prompt kualitas dengan **Laravel Octane + RoadR
 
 ### Setup & Jalankan Aplikasi
 
-1. **Clone repository**
-   ```bash
-   git clone <repository-url>
-   cd mental-prompt
-   ```
+1.  **Clone repository**
+    ```bash
+    git clone <repository-url>
+    cd mental-prompt
+    ```
 
-2. **Setup environment**
-   ```bash
-   cp env.example .env
-   ```
+2.  **Setup environment**
+    ```bash
+    cp env.example .env
+    ```
 
-3. **Build dan jalankan containers**
-   ```bash
-   docker-compose up --build
-   ```
+3.  **Build dan jalankan containers**
+    ```bash
+    docker-compose up --build -d
+    ```
 
-4. **Akses aplikasi**
-   - Frontend: http://localhost
-   - Database: localhost:3306
+4.  **Jalankan database migrations**
+    ```bash
+    docker-compose exec app php artisan migrate
+    ```
+
+5.  **Akses aplikasi**
+    -   Frontend: http://localhost
+    -   Database: localhost:3306
 
 ### Docker Services
 
-- **App (Laravel Octane)**: PHP 8.2 CLI + RoadRunner server
-- **MySQL 8.0**: Database dengan persistent storage
-- **Nginx**: Reverse proxy dengan konfigurasi optimized untuk Octane
+-   **App (Laravel Octane & Nginx)**: PHP 8.2 CLI + RoadRunner server dengan Nginx sebagai reverse proxy, semua dalam satu container.
+-   **MySQL 8.0**: Database dengan persistent storage
 
 ### ⚡ Laravel Octane
 
@@ -90,7 +94,8 @@ docker-compose exec app php artisan octane:status
 File `.env` sudah dikonfigurasi untuk Docker:
 - **Server**: Laravel Octane dengan RoadRunner
 - **Database**: MySQL container
-- **Cache/Queue/Session**: File-based (simple & reliable)
+- **Cache/Queue**: Menggunakan driver `database` untuk antrian yang lebih robust.
+- **Session**: File-based (simple & reliable)
 - **App URL**: http://localhost
 
 ### Database
@@ -100,7 +105,7 @@ File `.env` sudah dikonfigurasi untuk Docker:
 - **Username**: root
 - **Password**: rootpassword
 
-Migrations akan otomatis dijalankan saat container pertama kali start.
+Pastikan untuk menjalankan migrasi secara manual setelah container berjalan.
 
 ## 📋 Development tanpa Docker
 
@@ -163,12 +168,10 @@ The server exposes a single tool that can be called by an MCP client.
 -   **Tool Name**: `submit_prompt_quality`
 -   **Description**: Receives prompt quality scores and forwards them to the Laravel backend.
 -   **Arguments**:
+    -   `client_uuid` (string, required): A unique identifier for the client.
     -   `project` (string, required): The name of the project.
     -   `efektivitas` (number, required): Effectiveness score (0-100).
     -   `membingungkan` (number, required): Confusion score (0-100).
-    -   `ambiguous` (number, optional): Ambiguity score (0-100).
-    -   `comments` (string, optional): Additional comments.
-    -   `client_uuid` (string, required by TypeScript version): A unique identifier for the client.
 
 ## 🔥 Performance Tips
 
