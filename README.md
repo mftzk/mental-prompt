@@ -1,256 +1,148 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Mental Prompt
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Mental Prompt adalah aplikasi web yang dirancang untuk membantu developer dan tim AI melacak, menganalisis, dan meningkatkan kualitas *prompt* yang digunakan dalam interaksi dengan model bahasa. Dengan sistem ini, Anda dapat memberikan skor kuantitatif terhadap *prompt* berdasarkan efektivitas dan kejelasannya, langsung dari editor kode Anda.
 
-# Mental Prompt - Laravel Application
+Aplikasi ini dibangun menggunakan **Laravel** sebagai backend API, **MySQL** untuk penyimpanan data, dan dikemas dalam **Docker** untuk kemudahan setup dan deployment.
 
-Aplikasi Laravel untuk manajemen prompt kualitas dengan **Laravel Octane + RoadRunner** untuk performa maksimal, disajikan melalui Nginx dalam satu container Docker.
+## Alur Kerja
 
-## 🚀 Quick Start dengan Docker
+1.  **Jalankan Server**: Anda menjalankan *backend* Laravel dan *database* menggunakan Docker.
+2.  **Buat Client**: Melalui *dashboard* web, Anda membuat sebuah "client" yang akan memberikan Anda sebuah `UUID` unik.
+3.  **Pasang MCP Server**: Anda menjalankan server MCP (Model Context Protocol) Python di lokal, yang bertindak sebagai jembatan antara editor Anda dan *backend*.
+4.  **Konfigurasi Editor**: Anda menambahkan *rule* di editor (misalnya, Cursor) untuk memanggil *tool* dari MCP server.
+5.  **Kirim Skor**: Setiap kali Anda ingin menilai sebuah *prompt*, Anda menjalankan *rule* tersebut, dan skor akan dikirim ke *backend* untuk dianalisis.
 
-### Prerequisites
-- Docker & Docker Compose terinstall
-- Git
+---
 
-### Setup & Jalankan Aplikasi
+## 1. Menjalankan API Server (Backend)
 
-1.  **Clone repository**
+Backend aplikasi ini berjalan di dalam kontainer Docker, yang memudahkan proses instalasi.
+
+1.  **Clone Repository**
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/ajie-pras/mental-prompt.git
     cd mental-prompt
     ```
 
-2.  **Setup environment**
+2.  **Konfigurasi Environment**
+    Salin file `.env.example` untuk membuat file konfigurasi lokal Anda.
     ```bash
-    cp env.example .env
+    cp .env.example .env
     ```
 
-3.  **Build dan jalankan containers**
+3.  **Jalankan Services**
+    Perintah ini akan membangun *image* dan menjalankan kontainer aplikasi serta *database* di *background*.
     ```bash
     docker-compose up --build -d
     ```
 
-4.  **Jalankan database migrations**
+4.  **Jalankan Migrasi Database**
+    Setelah kontainer berjalan, siapkan skema *database* dengan menjalankan perintah migrasi.
     ```bash
     docker-compose exec app php artisan migrate
     ```
 
-5.  **Akses aplikasi**
-    -   Frontend: http://localhost
-    -   Database: localhost:3306
+5.  **Akses Aplikasi**
+    Sekarang, aplikasi Anda sudah berjalan dan dapat diakses di [http://localhost](http://localhost).
 
-### Docker Services
+---
 
--   **App (Laravel Octane & Nginx)**: PHP 8.2 CLI + RoadRunner server dengan Nginx sebagai reverse proxy, semua dalam satu container.
--   **MySQL 8.0**: Database dengan persistent storage
+## 2. Membuat Client UUID
 
-### ⚡ Laravel Octane
+Untuk mengirim data ke API, setiap *client* (editor Anda) harus memiliki UUID yang terdaftar.
 
-Aplikasi ini menggunakan Laravel Octane dengan RoadRunner untuk:
-- **10-100x lebih cepat** dari traditional PHP-FPM
-- **In-memory application bootstrap** - aplikasi di-load sekali di memory
-- **Concurrent request handling** dengan 4 workers (configurable)
-- **Automatic worker recycling** setiap 500 requests untuk memory management
+1.  Buka *dashboard* aplikasi di *browser* Anda: [http://localhost](http://localhost).
+2.  Gunakan antarmuka yang tersedia untuk membuat entri "Client" baru.
+3.  Setelah dibuat, **salin (copy)** UUID yang dihasilkan. UUID ini akan digunakan pada langkah berikutnya.
 
-### Useful Commands
+---
 
-```bash
-# Jalankan di background
-docker-compose up -d
+## 3. Memasang MCP Server
 
-# Stop containers
-docker-compose down
+MCP Server adalah skrip Python yang menerima perintah dari editor Anda dan meneruskannya ke API backend.
 
-# Rebuild containers (clean build)
-docker-compose down && docker-compose up --build --force-recreate
-
-# Lihat logs
-docker-compose logs -f app
-
-# Lihat logs real-time dari Octane
-docker-compose logs -f app | grep -i octane
-
-# Masuk ke container app
-docker-compose exec app bash
-
-# Restart Octane (reload code changes)
-docker-compose restart app
-
-# Jalankan artisan commands
-docker-compose exec app php artisan migrate
-docker-compose exec app php artisan queue:work
-
-# Monitor Octane stats
-docker-compose exec app php artisan octane:status
-```
-
-### Environment Variables
-
-File `.env` sudah dikonfigurasi untuk Docker:
-- **Server**: Laravel Octane dengan RoadRunner
-- **Database**: MySQL container
-- **Cache/Queue**: Menggunakan driver `database` untuk antrian yang lebih robust.
-- **Session**: File-based (simple & reliable)
-- **App URL**: http://localhost
-
-### Database
-
-- **Host**: mysql
-- **Database**: mental_prompt
-- **Username**: root
-- **Password**: rootpassword
-
-Pastikan untuk menjalankan migrasi secara manual setelah container berjalan.
-
-## 📋 Development tanpa Docker
-
-Jika ingin development tanpa Docker:
-
-```bash
-composer install
-npm install
-npm run build
-php artisan key:generate
-php artisan migrate
-
-# Install Octane
-php artisan octane:install
-
-# Start Octane server
-php artisan octane:start --server=roadrunner --host=0.0.0.0 --port=8000
-```
-
-## 📈 MCP Prompt Health Server
-
-The `mcp-prompt-health/` directory contains a dedicated [Model Context Protocol (MCP)](https://docs.cursor.sh/extension-authoring/mcp) server for monitoring and submitting prompt quality metrics from a compatible editor (like Cursor) to the Laravel backend.
-
-This server acts as a bridge, exposing an MCP tool that the editor can call. When called, the server forwards the metrics as an HTTP request to the `/api/prompt-quality` endpoint of this application.
-
-There are two implementations available: Python (primary) and TypeScript (legacy/reference).
-
-### Setup & Running (Python)
-
-The primary and recommended server is written in Python using `fastmcp`.
-
-1.  **Navigate to the directory:**
+1.  **Masuk ke Direktori**
     ```bash
     cd mcp-prompt-health
     ```
 
-2.  **Create a virtual environment (recommended):**
+2.  **Buat Virtual Environment** (Opsional tapi direkomendasikan)
+    Ini akan mengisolasi *dependency* Python untuk proyek ini.
     ```bash
-    python -m venv .venv
+    # Untuk macOS/Linux
+    python3 -m venv .venv
     source .venv/bin/activate
+
+    # Untuk Windows
+    python -m venv .venv
+    .venv\Scripts\activate
     ```
 
-3.  **Install dependencies:**
+3.  **Install Dependencies**
+    Install `fastmcp` dan `httpx` yang dibutuhkan oleh server.
     ```bash
     pip install -r requirements.txt
     ```
-    *Note: The `requirements.txt` file should contain `fastmcp` and `httpx`.*
 
-4.  **Run the server:**
+4.  **Konfigurasi Environment Variable**
+    Atur `CLIENT_UUID` yang sudah Anda salin dari *dashboard*.
+    ```bash
+    # Untuk macOS/Linux
+    export CLIENT_UUID="your-uuid-from-dashboard"
+
+    # Untuk Windows (Command Prompt)
+    set CLIENT_UUID="your-uuid-from-dashboard"
+    ```
+    *Pastikan untuk mengganti `your-uuid-from-dashboard` dengan UUID yang sebenarnya.*
+
+5.  **Jalankan Server**
     ```bash
     python prompt_quality_server.py
     ```
-    The server will start and listen for requests over standard I/O (stdio).
+    Server sekarang aktif dan siap menerima perintah dari editor Anda.
 
-### Configuration
+---
 
-The server's behavior can be configured with environment variables:
+## 4. Contoh Konfigurasi Rule (Cursor)
 
--   `PROMPT_QUALITY_API`: Sets the base URL for the Laravel backend API endpoint.
-    -   **Default**: `http://localhost:8000`
-    -   **Example**: `export PROMPT_QUALITY_API="https://your-production-app.com"`
--   `CLIENT_UUID`: Sets a default client identifier.
-    -   **Example**: `export CLIENT_UUID="your-unique-id"`
+Langkah terakhir adalah memberitahu editor Anda cara berkomunikasi dengan MCP Server. Berikut adalah contoh konfigurasi untuk editor Cursor menggunakan file `~/.cursor/mcp.json`.
 
-### MCP Tool: `submit_prompt_quality`
+```json
+{
+  "mcp_server": {
+    "command": [
+      "python",
+      // Ganti dengan path absolut ke skrip di komputer Anda
+      "/path/to/your/project/mental-prompt/mcp-prompt-health/prompt_quality_server.py"
+    ],
+    "env": {
+      // Tempel UUID Anda di sini
+      "CLIENT_UUID": "your-uuid-from-dashboard",
+      // URL backend jika berbeda dari default
+      "PROMPT_QUALITY_API": "http://localhost"
+    }
+  },
+  "rules": [
+    {
+      "scope": "always",
+      "action": {
+        "type": "mcp",
+        "tool": "submit_prompt_quality",
+        "args": {
+          "project": "{{repo.name}}",
+          "efektivitas": "{{eval.eff}}",
+          "membingungkan": "{{eval.confusing}}",
+          "ambiguous": "{{eval.ambiguous}}",
+          "comments": "{{eval.comment}}"
+        }
+      }
+    }
+  ]
+}
+```
 
-The server exposes a single tool that can be called by an MCP client.
+### Penjelasan Konfigurasi:
 
--   **Tool Name**: `submit_prompt_quality`
--   **Description**: Receives prompt quality scores and forwards them to the Laravel backend.
--   **Arguments**:
-    -   `project` (string, required): The name of the project.
-    -   `efektivitas` (number, required): Effectiveness score (1-100).
-    -   `membingungkan` (number, required): Confusion score (1-100).
-    -   `ambiguous` (number, optional): Ambiguity score (1-100).
-    -   `comments` (string, optional): Additional comments.
-
-## 🔥 Performance Tips
-
-1. **Octane Worker Tuning**: Adjust workers based on CPU cores
-   ```bash
-   php artisan octane:start --workers=8 --max-requests=1000
-   ```
-
-2. **Cache untuk Production**:
-   ```bash
-   docker-compose exec app php artisan config:cache
-   docker-compose exec app php artisan route:cache
-   docker-compose exec app php artisan view:cache
-   ```
-
-3. **Monitor Performance**:
-   ```bash
-   docker-compose exec app php artisan octane:status
-   ```
-
-## About Laravel
-
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
-
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
-
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+-   **`mcp_server.command`**: Path absolut ke skrip `prompt_quality_server.py`. Pastikan untuk menyesuaikannya.
+-   **`mcp_server.env`**: Environment variable yang akan digunakan saat menjalankan server. `CLIENT_UUID` wajib diisi.
+-   **`rules`**: Mendefinisikan kapan dan bagaimana *tool* `submit_prompt_quality` akan dipanggil. Dalam contoh ini, *rule* akan selalu aktif (`"scope": "always"`) dan akan mengambil nilai dari evaluasi *prompt* (`eval.*`) untuk dikirim sebagai argumen.
