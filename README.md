@@ -131,27 +131,34 @@ The `mcp-prompt-health/` directory contains a dedicated [Model Context Protocol 
 
 This server acts as a bridge, exposing an MCP tool that the editor can call. When called, the server forwards the metrics as an HTTP request to the `/api/prompt-quality` endpoint of this application.
 
-There are two implementations available: TypeScript (primary) and Python (legacy/reference).
+There are two implementations available: Python (primary) and TypeScript (legacy/reference).
 
-### Setup & Running (TypeScript)
+### Setup & Running (Python)
 
-The primary and recommended server is written in TypeScript.
+The primary and recommended server is written in Python using `fastmcp`.
 
 1.  **Navigate to the directory:**
     ```bash
     cd mcp-prompt-health
     ```
 
-2.  **Install dependencies:**
+2.  **Create a virtual environment (recommended):**
     ```bash
-    npm install
+    python -m venv .venv
+    source .venv/bin/activate
     ```
 
-3.  **Run the server:**
+3.  **Install dependencies:**
     ```bash
-    npm run dev
+    pip install -r requirements.txt
     ```
-    This command uses `tsx` to run the `prompt-quality-server.ts` file. The server will start and listen for requests over standard I/O (stdio).
+    *Note: The `requirements.txt` file should contain `fastmcp` and `httpx`.*
+
+4.  **Run the server:**
+    ```bash
+    python prompt_quality_server.py
+    ```
+    The server will start and listen for requests over standard I/O (stdio).
 
 ### Configuration
 
@@ -160,6 +167,8 @@ The server's behavior can be configured with environment variables:
 -   `PROMPT_QUALITY_API`: Sets the base URL for the Laravel backend API endpoint.
     -   **Default**: `http://localhost:8000`
     -   **Example**: `export PROMPT_QUALITY_API="https://your-production-app.com"`
+-   `CLIENT_UUID`: Sets a default client identifier.
+    -   **Example**: `export CLIENT_UUID="your-unique-id"`
 
 ### MCP Tool: `submit_prompt_quality`
 
@@ -168,10 +177,11 @@ The server exposes a single tool that can be called by an MCP client.
 -   **Tool Name**: `submit_prompt_quality`
 -   **Description**: Receives prompt quality scores and forwards them to the Laravel backend.
 -   **Arguments**:
-    -   `client_uuid` (string, required): A unique identifier for the client.
     -   `project` (string, required): The name of the project.
-    -   `efektivitas` (number, required): Effectiveness score (0-100).
-    -   `membingungkan` (number, required): Confusion score (0-100).
+    -   `efektivitas` (number, required): Effectiveness score (1-100).
+    -   `membingungkan` (number, required): Confusion score (1-100).
+    -   `ambiguous` (number, optional): Ambiguity score (1-100).
+    -   `comments` (string, optional): Additional comments.
 
 ## 🔥 Performance Tips
 
