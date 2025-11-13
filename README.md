@@ -120,6 +120,56 @@ php artisan octane:install
 php artisan octane:start --server=roadrunner --host=0.0.0.0 --port=8000
 ```
 
+## 📈 MCP Prompt Health Server
+
+The `mcp-prompt-health/` directory contains a dedicated [Model Context Protocol (MCP)](https://docs.cursor.sh/extension-authoring/mcp) server for monitoring and submitting prompt quality metrics from a compatible editor (like Cursor) to the Laravel backend.
+
+This server acts as a bridge, exposing an MCP tool that the editor can call. When called, the server forwards the metrics as an HTTP request to the `/api/prompt-quality` endpoint of this application.
+
+There are two implementations available: TypeScript (primary) and Python (legacy/reference).
+
+### Setup & Running (TypeScript)
+
+The primary and recommended server is written in TypeScript.
+
+1.  **Navigate to the directory:**
+    ```bash
+    cd mcp-prompt-health
+    ```
+
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+
+3.  **Run the server:**
+    ```bash
+    npm run dev
+    ```
+    This command uses `tsx` to run the `prompt-quality-server.ts` file. The server will start and listen for requests over standard I/O (stdio).
+
+### Configuration
+
+The server's behavior can be configured with environment variables:
+
+-   `PROMPT_QUALITY_API`: Sets the base URL for the Laravel backend API endpoint.
+    -   **Default**: `http://localhost:8000`
+    -   **Example**: `export PROMPT_QUALITY_API="https://your-production-app.com"`
+
+### MCP Tool: `submit_prompt_quality`
+
+The server exposes a single tool that can be called by an MCP client.
+
+-   **Tool Name**: `submit_prompt_quality`
+-   **Description**: Receives prompt quality scores and forwards them to the Laravel backend.
+-   **Arguments**:
+    -   `project` (string, required): The name of the project.
+    -   `efektivitas` (number, required): Effectiveness score (0-100).
+    -   `membingungkan` (number, required): Confusion score (0-100).
+    -   `ambiguous` (number, optional): Ambiguity score (0-100).
+    -   `comments` (string, optional): Additional comments.
+    -   `client_uuid` (string, required by TypeScript version): A unique identifier for the client.
+
 ## 🔥 Performance Tips
 
 1. **Octane Worker Tuning**: Adjust workers based on CPU cores
