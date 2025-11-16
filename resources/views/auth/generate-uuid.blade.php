@@ -22,20 +22,14 @@
         }
 
         .logo {
-            text-align: center;
+            display: flex;
+            justify-content: center;
             margin-bottom: 30px;
         }
 
-        .logo h1 {
-            color: var(--clr-primary);
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .logo p {
-            color: var(--clr-text-sub);
-            font-size: 14px;
+        .logo img {
+            width: 160px;
+            height: auto;
         }
 
         #generateSection {
@@ -197,8 +191,7 @@
 <body class="gradient-bg">
     <div class="container glass-card">
         <div class="logo">
-            <h1>🎯 Prompt Quality</h1>
-            <p>Generate Client UUID</p>
+            <img src="{{ asset('img/mntl.svg') }}" alt="MNTL Logo">
         </div>
 
         <div id="generateSection">

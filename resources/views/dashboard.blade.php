@@ -560,17 +560,11 @@
         <div class="navbar-content">
             <!-- Logo/Brand -->
             <div class="navbar-brand">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-[var(--clr-primary)]">
-                    <path d="M12 4C14.2091 4 16 5.79086 16 8C16 10.2091 14.2091 12 12 12C9.79086 12 8 10.2091 8 8C8 5.79086 9.79086 4 12 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M12 12V20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M18 14H19C20.1046 14 21 14.8954 21 16V17C21 18.1046 20.1046 19 19 19H18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M6 14H5C3.89543 14 3 14.8954 3 16V17C3 18.1046 3.89543 19 5 19H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <span class="font-semibold">Mental Prompt</span>
+                <img src="{{ asset('img/mntl.svg') }}" alt="MNTL Logo" style="height: 32px; width: auto;">
             </div>
 
             <!-- Right Actions -->
-            <div class="navbar-actions">
+            <div class="navbar-actions" style="margin-left: auto;">
                 <!-- Client Info (hidden on mobile) -->
                 <div class="navbar-client-info">
                     <div class="flex items-center gap-2 text-[var(--clr-text-sub)]">
