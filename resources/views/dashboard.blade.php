@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prompt Quality Dashboard</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('img/mntl.svg') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])

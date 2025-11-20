@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generate UUID - Prompt Quality Dashboard</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('img/mntl.svg') }}">
     @vite(['resources/css/theme.css', 'resources/js/theme.js'])
     <style>
         body {

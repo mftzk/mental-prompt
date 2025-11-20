@@ -26,6 +26,11 @@ Route::get('/dashboard', [PromptQualityController::class, 'dashboard'])
     ->middleware('client.auth')
     ->name('dashboard');
 
+// Neuron UI Demo route
+Route::get('/neuron-demo', function () {
+    return view('neuron-demo');
+})->name('neuron-demo');
+
 Route::get('/db-test', function () {
     return response()->json([
         'environment' => [

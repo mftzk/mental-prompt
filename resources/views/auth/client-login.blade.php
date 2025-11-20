@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Prompt Quality Dashboard</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('img/mntl.svg') }}">
     @vite(['resources/css/theme.css', 'resources/js/theme.js'])
     <style>
         :root {
@@ -29,10 +30,78 @@
             padding: 20px;
         }
 
-        .container {
+        /* New Layout Wrapper */
+        .login-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            width: 100%;
             max-width: 400px;
+            align-items: center;
+        }
+
+        .intro-section {
+            text-align: center;
+            width: 100%;
+        }
+
+        .container {
             width: 100%;
             padding: 40px;
+            /* glass-card class handles background */
+        }
+
+        .how-to-section {
+            text-align: center;
+            padding: 16px;
+            margin-top: 20px;
+            border-top: 1px solid rgba(var(--clr-border-rgb-light), 0.5);
+        }
+
+        @media (min-width: 900px) {
+            .login-layout {
+                flex-direction: row;
+                max-width: 1000px;
+                justify-content: space-between;
+                gap: 60px;
+                align-items: center;
+            }
+
+            .intro-section {
+                text-align: left;
+                flex: 1;
+                max-width: 480px;
+            }
+
+            .how-to-section {
+                text-align: left;
+                padding: 20px 0 0 0;
+                margin-top: 30px;
+            }
+
+            .how-to-section .help-text {
+                margin-left: 0 !important;
+                max-width: 100% !important;
+            }
+
+            .container {
+                max-width: 400px;
+                flex-shrink: 0;
+            }
+            
+            .logo {
+                justify-content: flex-start !important;
+            }
+
+            .service-description {
+                text-align: left !important;
+                padding: 0 !important;
+            }
+
+            .service-description p {
+                margin-left: 0 !important;
+                max-width: 100% !important;
+            }
         }
 
         .glass-card {
@@ -54,7 +123,7 @@
         }
 
         .logo img {
-            width: 160px; /* Lebar yang lebih sesuai */
+            width: 160px;
             height: auto;
         }
 
@@ -68,6 +137,36 @@
         .logo p {
             color: var(--clr-text-sub);
             font-size: 14px;
+        }
+
+        .service-description {
+            text-align: center;
+            margin-bottom: 32px;
+            padding: 0 20px;
+        }
+
+        .service-description h2 {
+            color: var(--clr-text-main);
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .service-description p {
+            color: var(--clr-text-sub);
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+            max-width: 320px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .description-highlight {
+            color: var(--clr-primary) !important;
+            font-weight: 500;
+            font-size: 15px !important;
         }
 
         .form-group {
@@ -177,60 +276,83 @@
     </style>
 </head>
 <body class="gradient-bg">
-    <div class="container glass-card">
-        <div class="logo">
-            <img src="{{ asset('img/mntl.svg') }}" alt="MNTL Logo">
-        </div>
-
-        @if(session('error'))
-        <div class="error-message" style="background: #fee2e2; padding: 12px; border-radius: 8px; margin-bottom: 20px;">
-            {{ session('error') }}
-        </div>
-        @endif
-
-        @if(session('message'))
-        <div class="success-message">
-            {{ session('message') }}
-        </div>
-        @endif
-
-        <form method="POST" action="{{ route('login') }}">
-            @csrf
-            
-            <div class="form-group">
-                <label for="uuid">Client UUID</label>
-                <input
-                    type="text"
-                    id="uuid"
-                    name="uuid"
-                    class="input-styled {{ $errors->has('uuid') ? 'error' : '' }}"
-                    placeholder="550e8400-e29b-41d4-a716-446655440000"
-                    pattern="[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
-                    value="{{ old('uuid') }}"
-                    required
-                    autofocus
-                >
-                @if($errors->has('uuid'))
-                <div class="error-message">
-                    ⚠️ {{ $errors->first('uuid') }}
-                </div>
-                @endif
-                <p class="help-text">Enter your unique client UUID to access your analytics</p>
+    <div class="login-layout">
+        <!-- Left Side: Intro -->
+        <div class="intro-section">
+            <div class="logo">
+                <img src="{{ asset('img/mntl.svg') }}" alt="MNTL Logo">
             </div>
 
-            <button type="submit">
-                Access Dashboard
-            </button>
-        </form>
+            <div class="service-description">
+                <h2>Mental Prompt Analytics</h2>
+                <p>Transform your prompts into powerful, effective communication tools. Track, analyze, and optimize your prompt quality with real-time insights and data-driven recommendations.</p>
+                <p class="description-highlight">Elevate your prompting game with intelligent quality assessment and actionable feedback.</p>
+            </div>
 
-        <div class="divider">
-            <span>Don't have a UUID?</span>
+            <div class="how-to-section">
+                <p style="color: var(--clr-text-main); font-size: 14px; font-weight: 600; margin-bottom: 8px;">First time here?</p>
+                <p class="help-text" style="margin-bottom: 12px; max-width: 280px; margin-left: auto; margin-right: auto; line-height: 1.5;">
+                    Learn how to install the MCP server and configure your editor to start tracking prompt quality.
+                </p>
+                <a href="https://github.com/mftzk/mental-prompt/blob/main/README.md" target="_blank" style="color: var(--clr-primary); text-decoration: none; font-weight: 500; font-size: 14px; display: inline-flex; align-items: center; gap: 4px;">
+                    <span>Read the Setup Guide</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                </a>
+            </div>
         </div>
 
-        <div class="generate-link">
-            <a href="{{ route('generate-uuid') }}">Generate new UUID →</a>
+        <!-- Right Side: Login Card -->
+        <div class="container glass-card">
+                @if(session('error'))
+                <div class="error-message" style="background: #fee2e2; padding: 12px; border-radius: 8px; margin-bottom: 20px;">
+                    {{ session('error') }}
+                </div>
+                @endif
+
+                @if(session('message'))
+                <div class="success-message">
+                    {{ session('message') }}
+                </div>
+                @endif
+
+                <form method="POST" action="{{ route('login') }}">
+                    @csrf
+                    
+                    <div class="form-group">
+                        <label for="uuid">Client UUID</label>
+                        <input
+                            type="text"
+                            id="uuid"
+                            name="uuid"
+                            class="input-styled {{ $errors->has('uuid') ? 'error' : '' }}"
+                            placeholder="550e8400-e29b-41d4-a716-446655440000"
+                            pattern="[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                            value="{{ old('uuid') }}"
+                            required
+                            autofocus
+                        >
+                        @if($errors->has('uuid'))
+                        <div class="error-message">
+                            ⚠️ {{ $errors->first('uuid') }}
+                        </div>
+                        @endif
+                        <p class="help-text">Enter your unique client UUID to access your analytics</p>
+                    </div>
+
+                    <button type="submit">
+                        Access Dashboard
+                    </button>
+                </form>
+
+                <div class="divider">
+                    <span>Don't have a UUID?</span>
+                </div>
+
+                <div class="generate-link">
+                    <a href="{{ route('generate-uuid') }}">Generate new UUID →</a>
+                </div>
+            </div>
         </div>
     </div>
 </body>
 </html>
-

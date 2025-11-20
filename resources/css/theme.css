@@ -29,6 +29,19 @@
 }
 
 /* --------------------------------------------------
+   Neuron Network Variables
+-------------------------------------------------- */
+:root {
+    --neuron-primary:   #00d4aa; /* bright cyan */
+    --neuron-secondary: #7c3aed; /* purple */
+    --neuron-tertiary:  #ef4444; /* red */
+    --neuron-connection: rgba(255, 255, 255, 0.3);
+    --neuron-glow:      rgba(0, 212, 170, 0.4);
+    --neuron-node-size: 12px;
+    --neuron-pulse-duration: 2s;
+}
+
+/* --------------------------------------------------
    Dark Mode Color Variables
 -------------------------------------------------- */
 :root[data-theme="dark"] {
@@ -43,6 +56,12 @@
     --clr-text-on-primary: #ffffff;
     --clr-shadow:       rgba(0, 0, 0, 0.3);
     --clr-shadow-lg:    rgba(0, 0, 0, 0.5);
+    /* Dark mode neuron colors */
+    --neuron-primary:   #00d4aa; /* keep bright cyan */
+    --neuron-secondary: #a855f7; /* lighter purple */
+    --neuron-tertiary:  #f87171; /* lighter red */
+    --neuron-connection: rgba(255, 255, 255, 0.2);
+    --neuron-glow:      rgba(0, 212, 170, 0.6);
 }
 
 /* --------------------------------------------------
@@ -205,6 +224,203 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+}
+
+/* --------------------------------------------------
+   Neuron Network Components
+-------------------------------------------------- */
+
+/* Neuron Node Styles */
+.neuron-node {
+    width: var(--neuron-node-size);
+    height: var(--neuron-node-size);
+    border-radius: 50%;
+    background: var(--neuron-primary);
+    position: absolute;
+    box-shadow: 0 0 10px var(--neuron-glow);
+    animation: neuron-pulse var(--neuron-pulse-duration) infinite ease-in-out;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.neuron-node:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 20px var(--neuron-glow);
+}
+
+.neuron-node.secondary {
+    background: var(--neuron-secondary);
+}
+
+.neuron-node.tertiary {
+    background: var(--neuron-tertiary);
+}
+
+.neuron-node.input {
+    background: linear-gradient(45deg, var(--neuron-primary), var(--neuron-secondary));
+}
+
+.neuron-node.output {
+    background: linear-gradient(45deg, var(--neuron-secondary), var(--neuron-tertiary));
+}
+
+/* Neuron Connection Lines */
+.neuron-connection {
+    position: absolute;
+    stroke: var(--neuron-connection);
+    stroke-width: 1px;
+    fill: none;
+    opacity: 0.6;
+    transition: all 0.3s ease;
+}
+
+.neuron-connection.active {
+    stroke: var(--neuron-primary);
+    stroke-width: 2px;
+    opacity: 1;
+    animation: data-flow 1.5s infinite linear;
+}
+
+/* Neuron Network Background */
+.neuron-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+    background:
+        radial-gradient(circle at 20% 80%, var(--neuron-glow) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(124, 58, 237, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(239, 68, 68, 0.1) 0%, transparent 50%);
+}
+
+.neuron-grid {
+    background-image:
+        linear-gradient(var(--neuron-connection) 1px, transparent 1px),
+        linear-gradient(90deg, var(--neuron-connection) 1px, transparent 1px);
+    background-size: 50px 50px;
+    opacity: 0.1;
+}
+
+/* Neuron Card Component */
+.neuron-card {
+    background: var(--clr-card-bg);
+    border: 1px solid var(--clr-border);
+    border-radius: 16px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px var(--clr-shadow);
+}
+
+.neuron-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--neuron-primary), var(--neuron-secondary), var(--neuron-tertiary));
+    border-radius: 16px 16px 0 0;
+}
+
+/* Floating Neuron Particles */
+.neuron-particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: var(--neuron-primary);
+    border-radius: 50%;
+    animation: float-particle 6s infinite linear;
+    opacity: 0.6;
+}
+
+.neuron-particle:nth-child(2n) {
+    background: var(--neuron-secondary);
+    animation-duration: 8s;
+}
+
+.neuron-particle:nth-child(3n) {
+    background: var(--neuron-tertiary);
+    animation-duration: 10s;
+}
+
+/* Keyframe Animations */
+@keyframes neuron-pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+}
+
+@keyframes data-flow {
+    0% {
+        stroke-dasharray: 5, 15;
+        stroke-dashoffset: 0;
+    }
+    100% {
+        stroke-dasharray: 5, 15;
+        stroke-dashoffset: -20;
+    }
+}
+
+@keyframes float-particle {
+    0% {
+        transform: translateY(100vh) translateX(0);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.6;
+    }
+    90% {
+        opacity: 0.6;
+    }
+    100% {
+        transform: translateY(-100px) translateX(100px);
+        opacity: 0;
+    }
+}
+
+/* Neuron Network Container */
+.neuron-network {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    background: linear-gradient(135deg, var(--clr-bg) 0%, rgba(0, 212, 170, 0.05) 100%);
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--clr-border);
+}
+
+/* Interactive Neural Links */
+.neural-link {
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--neuron-primary), transparent);
+    transform-origin: left center;
+    animation: neural-link-pulse 3s infinite ease-in-out;
+}
+
+.neural-link.delay-1 { animation-delay: 0.5s; }
+.neural-link.delay-2 { animation-delay: 1s; }
+.neural-link.delay-3 { animation-delay: 1.5s; }
+
+@keyframes neural-link-pulse {
+    0%, 100% {
+        opacity: 0;
+        transform: scaleX(0);
+    }
+    50% {
+        opacity: 1;
+        transform: scaleX(1);
+    }
 }
 
 /* --------------------------------------------------
